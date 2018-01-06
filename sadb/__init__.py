@@ -49,7 +49,7 @@ def select_devices(devices):
     print("Device list:")
     print("0) All devices")
     for i, d in enumerate(devices, start=1):
-        print("%d) %s\t%s" % (i, d['serial'], d['model']))
+        print("%d) %s\t%s" % (i, d['serial'], d['product']))
     print("q) Exit this operation")
     selected = input("\nselect: ")
     if selected == '0':
@@ -75,6 +75,11 @@ def read_args():
     return sys.argv[1:]
 
 
+def get(str,key):
+    if key in str:
+        return str[str.index(key)+len(key)+len(":"):str.index(" ",str.index(key),len(str)-1)]
+    return str[0:str.index(" ")]
+
 def read_devices():
     """ 读取设备列表 """
     devices = []
@@ -86,14 +91,9 @@ def read_devices():
         if not line:
             break
         if line.strip() and not line.startswith('List of devices'):
-            d = re.split(r'\s+', line.strip())
-            # print("serial: %s, model: %s, transport_id: %s\n" % (d[0],d[4],d[6]))
             devices.append({
-                'serial': d[0],
-                'usb': d[2],
-                'product': d[3],
-                'model': d[4],
-                'device': d[5]
+                'serial': get(line,"serial"),
+                'product': get(line,"product"),
             })
 
     return devices, outputs
@@ -103,7 +103,7 @@ def exec_adb_cmd_on_device(device, args):
     """ 执行 adb 命令 """
     cmd = [adb_path, "-s", device['serial']]
     cmd += args
-    print('\n[{model}]exec: adb -s {serial} {cmd}'.format(cmd=' '.join(args), serial=device['serial'], model=device['model']))
+    print('\n[{product}]exec: adb -s {serial} {cmd}'.format(cmd=' '.join(args), serial=device['serial'], product=device['product']))
     subprocess.call(cmd)
 
 
